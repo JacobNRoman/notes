@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="/register" method="POST"/>
+    <div><h1 id="heading"><strong>Registration</strong></h1></div>
+    <div><label for="email">Email</label></div>
+    <div><input type="text" name="email" id="email" value="{{email}}"/></div>
+    <div><label for="password">Password</label></div>
+    <div><input type="password" name="password" id="password" value="{{password}}"/></div>
+    <div><label for="verify">Verify password</label></div>
+    <div><input type="password" name="verify" id="verify" value="{{verify}}"/></div>
+    <div><input id="submit" value="register" type="submit"/></div>
+</form>
+{% endblock %}

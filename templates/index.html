@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Your Feed:</h1>
+
+{% for note in notes %}
+    <div>
+        <p>{{note.body}}</p>
+    </div>
+{% endfor %}
+{% endblock %}
