@@ -4,17 +4,21 @@
 <h3>We'd like to get a little info about you.</h3>
 
 <form action="/newaccount" method="POST"/>
-<div>
-  <label for="name">Name</label>
-</div>
-    <div><input type="text" name="name" id="name" value="{{name}}"/></div>
-<div>
-  <label for="Username">Username</label>
-</div>
-    <div><input type="username" name="username" id="username" value="{{username}}"/></div>
-<div>
-  <input id="submit" value="submit" type="submit"/>
-</div>
+  <div>
+    <label for="name">Name</label>
+  </div>
+  <div><input type="text" name="name" id="name" value="{{name}}"/></div>
+  <div>
+    <label for="Username">Username</label>
+  </div>
+  <div><input type="text" name="username" id="username" value="{{username}}"/></div>
+  <div>
+    <label for="aboutme">About Me</label>
+  </div>
+  <div><input type="text" name="aboutme" id="aboutme" value="{{aboutme}}"/></div>
+  <div>
+    <input id="submit" value="submit" type="submit"/>
+  </div>
 </form>
 
 {% endblock %}
