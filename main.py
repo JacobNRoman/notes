@@ -85,7 +85,7 @@ def login():
 def register():
     if request.method == 'POST':
         email = request.form['email']
-        #TODO: insert some kind of email validation. Regex? NOTE: current build uses usernames, not email. So, substitute TODO: refactor code to stop using 'email' keyword and use username instead.
+        #TODO: insert some kind of email validation. Regex?
         password = request.form['password']
         #TODO: Complexity checker?
         verify = request.form['verify']
@@ -110,11 +110,25 @@ def register():
             db.session.commit()
             session['email'] = email
             #TODO - before redirecting home, first get their name and profile details. 
-            return redirect('/')
+            return redirect('/newaccount')
         else:
             flash("User with this email already exists")
             return redirect('/register')
     return render_template('register.html')
+
+@app.route('/newaccount', methods=['GET', 'POST'])
+def newAccount():
+    if request.method == 'POST':
+        user = User.query.filter_by(email=session['email']).first()
+        name = request.form['name']
+        username = request.form['username'] 
+        #TODO check if username already exists, and if so send an error
+        user.name = name
+        user.username = username
+        db.session.commit()
+        # TODO: add birthday
+        return redirect("/")
+    return render_template("newaccount.html")
 
 @app.route('/logout')
 def logout():
@@ -126,6 +140,12 @@ def index():
     # This renders the 'Feed' page.
     notes = Note.query.all()
     return render_template('index.html', notes=notes)
+
+@app.route("/profile")
+def profile():
+    user = User.query.filter_by(email=session['email']).first()
+    notes = Note.query.filter_by(owner_id=user.id).all()
+    return render_template('profile.html', user=user, notes=notes)
  
 
 @app.route('/newnote', methods=['POST', 'GET'])
