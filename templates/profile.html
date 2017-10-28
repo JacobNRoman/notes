@@ -1,26 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{user.name}}'s Profile</h1>
-<h2>@{{user.username}}</h2>
-<img src="static/images/question-mark.jpg" alt="profile" width="150" height="150"/>
-<h2>About Me:</h2>
-<p>{{user.about_me}}</p>
+<div class="container-fluid">
+  <h2 class="col-md-12">{{user.name}}'s Profile</h2>
+  <h4 class="col-md-12"><small>@{{user.username}}</small></h4>
+  <div class="col-md-12">
+    <img src="static/images/question-mark.jpg" alt="profile" width="150" height="150" class="col-md-12"/>
+  </div>
+  <div class="col-md-12">
+      <p class="col-md-12"><strong>About Me:</strong></p>
+      <p class="col-md-12">{{user.about_me}}</p>
+  </div>
 {% if user.id == g.user.id %}
-    <a href=#>Edit your profile!</a>
+    <a class="col-md-12" href=#>Edit your profile!</a>
 {% elif not g.user.is_following(user) %}
     <form action="/follow/{{user.username}}">
-        <input type="submit" value="Follow"/>
+        <input type="submit" value="Follow" class="btn btn-primary"/>
     </form>
 {% else %}
     <form action="/unfollow/{{user.username}}">
-        <input type="submit" value="Unfollow">
+        <input type="submit" value="Unfollow" class="btn btn-default"/>
     </form> 
 {% endif %}
-<div>
+</div>
+<div class="container-fluid">
 {% for note in notes %}
-    <div>{{note.body}}</div>
-    <hr/>
+<div class="col-md-4 panel panel-default"> 
+  <div class="panel-heading"><strong><a href="/profile/{{user.username}}">{{user.username}}</a></strong></div>
+  <div class="panel-body">{{note.body}}</div>
+  <div class="panel-footer">{{note.pub_date}}</div>
 {% endfor %}
 {% endblock %}
 </div>

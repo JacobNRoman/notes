@@ -12,17 +12,22 @@
       <div class="page-header">
         <h1>Notes <small>A cool place for cool folks</small></h1>
       </div>
-      <nav>
-        <a href="/logout">Log out</a>
-        <a href="/newnote">Write a New Note</a>
-        <a href="/">Your Feed</a>
-        <a href="{{url_for('profile', username = g.user.username)}}">Your Profile</a>
-        <a href="/users">All Users</a>
-        {% with messages = get_flashed_messages(with_categories=True) %}
-          {% for category, message in messages %}
-            <div>{{message}}</div>
-          {% endfor %}
-        {% endwith %}
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <ul class="nav navbar-nav">
+            <li><a href="/newnote">Write a New Note</a></li>
+            <li><a href="/">Your Feed</a></li>
+            {% if g.user %}
+              <li><a href="/logout">Log out</a></li>
+            {% endif %}
+            <li><a href="/users">All Users</a></li>
+            {% with messages = get_flashed_messages(with_categories=True) %}
+              {% for category, message in messages %}
+                <li>{{message}}</li>
+              {% endfor %}
+            {% endwith %}
+          </ul>
+        </div>
       </nav>
     {% block content %}
     {% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template, session, flash, g, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
 import hashlib
 import random
@@ -11,6 +12,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://notes:lcproject@localho
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 app.secret_key = 'y33kGcyk&P3B'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
 
 #followers is an association table that sets up a self-referential many-to-many relationship in the Users table, allowing us to track what Users a given user is following and who follows a given User. 
 followers = db.Table('followers',
@@ -36,7 +41,7 @@ class Note(db.Model):
         self.owner = owner
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
@@ -91,20 +96,13 @@ def check_pw_hash(password, hash):
         return True
     return False
 
-@app.before_request
-def require_login():
-    allowed_routes = ['login', 'register']
-    if request.endpoint not in allowed_routes and 'email' not in session:
-        return redirect('/login')
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.before_request
-# load_user gives a persistent global variable containing the current user whenever they are logged in. It requires the g module from flask, which I need to research more carefully. Also, doing it this way isn't terribly secure, as you are constantly passing the user's email through the session. Flask-Login apparently contains a more secure approach. 
-def load_user():
-    if session['email']:
-        user = User.query.filter_by(email=session['email']).first()
-    else:
-        user = {"name":"Guest"}
-    g.user = user
+def logged_in_user():
+    g.user = current_user
 
 
 @app.route('/login', methods=['POST', 'GET'] )
@@ -114,8 +112,7 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
         if user and check_pw_hash(password, user.pw_hash):
-            session['email'] = email
-            #creates the session['email'] object that allows us to have a persistent login
+            login_user(user)
             flash("Logged in")
             return redirect('/')
         else:
@@ -150,7 +147,7 @@ def register():
             new_user = User(email, password)
             db.session.add(new_user)
             db.session.commit()
-            session['email'] = email
+            login_user(new_user)
             #TODO - before redirecting home, first get their name and profile details. 
             return redirect('/newaccount')
         else:
@@ -159,6 +156,7 @@ def register():
     return render_template('register.html')
 
 @app.route('/newaccount', methods=['GET', 'POST'])
+@login_required
 def newAccount():
     if request.method == 'POST':
         user = User.query.filter_by(email=session['email']).first()
@@ -175,17 +173,21 @@ def newAccount():
     return render_template("newaccount.html")
 
 @app.route('/logout')
+@login_required
 def logout():
-    del session['email']
+    logout_user()
+    flash("You are now logged out")
     return redirect('/')
 
 @app.route("/")
 def index():
-    # This renders the 'Feed' page.
+    # This renders the 'Feed' page. TODO: implement an algorithm that displays feed based on followers, amps, and recency. 
     notes = Note.query.all()
-    return render_template('index.html', notes=notes)
+    users = User.query.all()
+    return render_template('index.html', notes=notes, users=users)
 
 @app.route("/users")
+@login_required
 def users():
     # Users simply renders a list of all users. TODO - replace this with a better user browsing and searching solution
     users = User.query.all()
@@ -193,13 +195,18 @@ def users():
 
 
 @app.route("/profile/<username>")
-def profile(username):
+@login_required
+def profile(username=None):
+    if username==None:
+        flash("No profile found")
+        return redirect("/users")
     user = User.query.filter_by(username=username).first()
     notes = Note.query.filter_by(owner_id=user.id).all()
     return render_template('profile.html', user=user, notes=notes)
  
  
 @app.route('/newnote', methods=['POST', 'GET'])
+@login_required
 def newNote():
     current_user = User.query.filter_by(email=session['email']).first()
     if request.method == 'POST':
@@ -219,6 +226,7 @@ def newNote():
     return render_template('newnote.html', current_user=current_user)
 
 @app.route('/follow/<username>')
+@login_required
 def follow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
@@ -237,6 +245,7 @@ def follow(username):
     return redirect(url_for('profile', username=username))
 
 @app.route('/unfollow/<username>')
+@login_required
 def unfollow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:

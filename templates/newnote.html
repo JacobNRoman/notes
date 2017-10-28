@@ -1,12 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div>
+    <h4>New Note</h4>
+</div>
   <form method='post'>
-      <h1>New Note</h1>
-      <label>
-          <textarea name="note"></textarea>
-      </label>
-      <input type="submit" value="Submit New Note" />
+      <div class="form-group">
+        <label><small>Write your note below</small>
+          <textarea name="note" class="form-control"></textarea>
+        </label>
+      </div>
+      <div class="form=group">
+        <input type="submit" value="Submit New Note" class="btn btn-primary"/>
+      </div>
   </form>
 
 {% endblock %}
