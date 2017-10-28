@@ -159,7 +159,7 @@ def register():
 @login_required
 def newAccount():
     if request.method == 'POST':
-        user = User.query.filter_by(email=session['email']).first()
+        user = load_user(g.user.id)
         name = request.form['name']
         username = request.form['username'] 
         about_me = request.form['aboutme']
@@ -208,7 +208,7 @@ def profile(username=None):
 @app.route('/newnote', methods=['POST', 'GET'])
 @login_required
 def newNote():
-    current_user = User.query.filter_by(email=session['email']).first()
+    user = load_user(g.user.id)
     if request.method == 'POST':
         # the indented code below handles the submission and creation of a new post
         note = request.form['note']
@@ -216,14 +216,14 @@ def newNote():
             #TODO validate so that you get an error message if note is over 140 chars
             flash("You didn't write anything!", "error")
             return redirect ('/newnote')
-        new_note = Note(note, current_user)
+        new_note = Note(note, user)
         db.session.add(new_note)
         db.session.commit()
         new_note_id = new_note.id
         note = Note.query.filter_by(id=new_note_id).first()
         # after a new post is submitted the user is redirected to that new post's individual page. 
-        return render_template("note.html", note=note, current_user=current_user)
-    return render_template('newnote.html', current_user=current_user)
+        return render_template("note.html", note=note)
+    return render_template('newnote.html')
 
 @app.route('/follow/<username>')
 @login_required
