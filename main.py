@@ -29,6 +29,7 @@ class Note(db.Model):
     body = db.Column(db.String(140))
     deleted = db.Column(db.Boolean)
     pub_date = db.Column(db.DateTime)
+    amps = db.Column(db.Integer)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
 
@@ -38,6 +39,7 @@ class Note(db.Model):
         if pub_date is None:
             pub_date = datetime.utcnow()
         self.pub_date = pub_date
+        self.amps = 0
         self.owner = owner
 
 
@@ -262,6 +264,17 @@ def unfollow(username):
     db.session.commit()
     flash('You have stopped following ' + username)
     return redirect(url_for('profile', username=username))
+
+@app.route('/amplify/<note_id>')
+@login_required
+def amplify(note_id):
+    #TODO make it so that you can't amplify a note more than once. This will probably require another association table. 
+    #TODO figure out how to make this feature available not just on the index page but also on profiles and an individual notes' page. The fact that it refreshes to index is a problem.
+    note = Note.query.filter_by(id=note_id).first()
+    note.amps = int(note.amps) + 1
+    db.session.commit()
+    return redirect("/")
+
 
 @app.route('/delete', methods=['POST'])
 def delete_post():

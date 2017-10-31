@@ -11,7 +11,7 @@
           {% endif %}
         {% endfor %}
         <div class="panel-body">{{note.body}}</div>
-        <div class="panel-footer">{{note.pub_date}}</div>
+        <div class="panel-footer">{{note.pub_date}}<form action="/amplify/{{note.id}}"><input type="submit" class="btn btn-primary" value="Amplify!"><span class="badge">{{note.amps}}</span></form></div>
 
     </div>
 {% endfor %}
